@@ -30,7 +30,7 @@ public class Solution {
 
     public static void Main()
     {
-        string[] words = ["abcd","dcba","lls","s","sssll"];
+        string[] words = {"abcd","dcba","lls","s","sssll"};
         PalindromePairs(words);
     }
     
@@ -55,7 +55,7 @@ public class Solution {
         for(int firstIndex = 0 ; firstIndex < words.Length ; ++firstIndex)
         {
             string word = words[firstIndex];
-            List<int> secondIndexes = trie.GetPalindromeIndexes(word, firstIndex);
+            List<int> secondIndexes = new Helper().GetPalindromeIndexes(trie.GetRoot(), word);
             
             foreach(int secondIndex in secondIndexes)
             {
@@ -116,70 +116,82 @@ public class Solution {
             node.SetIndex(index);
         }
         
-        public List<int> GetPalindromeIndexes(string word, int firstIndex)
+        public TrieNode GetRoot() => root;
+    }
+    
+    class Helper
+    {
+        List<int> indexes;
+        public List<int> GetPalindromeIndexes(TrieNode root, string word)
         {
-            List<int> indexes = new List<int>();
-            TrieNode node = root;
-            ProcessEmptyString(word, indexes, root);
+            indexes = new List<int>();
+            ProcessEmptyString(root, word);
+            
+            TrieNode node = TraverseFullWord(root, word);
+            if(node != null)
+            {
+                FindPalindromeIndexes(node);
+            }
+            return indexes;
+        }
+        
+        private TrieNode TraverseFullWord(TrieNode node, string word)
+        {
             for(int i = 0 ; i < word.Length ; ++i)
             {
                 if(i != 0)
-                    ProcessRemainingWord(word, i, node, indexes);
+                    ProcessRemainingWord(node, word, i);
                 char c = word[i];
                 if(node.DoesNotContainsChild(c))
                 {
-                    return indexes;
+                    return null;
                 }
-                TrieNode prevNode = node;
                 node = node.GetChild(c);
             }
-            
-            FindPalindromeIndexes(node, indexes);
-            return indexes;
+            return node;
         }
         
-        private void ProcessEmptyString(string word, List<int> indexes, TrieNode root)
+        private void ProcessEmptyString(TrieNode root, string word)
         {
-            CheckIndexAndAdd(root, indexes, word.ToCharArray().ToList());
+            CheckIndexAndAdd(root, word);
         }
         
-        private void ProcessRemainingWord(string word,int index,TrieNode node,List<int> indexes)
+        private void ProcessRemainingWord(TrieNode node, string word, int index)
         {
-            string newWord = word.Substring(index);
-            CheckIndexAndAdd(node, indexes, word, index);
+            CheckIndexAndAdd(node, word, index);
         }
         
-        private List<int> FindPalindromeIndexes(TrieNode node, List<int> indexes)
+        private List<int> FindPalindromeIndexes(TrieNode node)
         {
             List<char> path = new List<char>();
-            TraverseRemainingTrie(node, indexes, path);
+            TraverseRemainingTrie(node, path);
             return indexes;
         }
         
-        private void TraverseRemainingTrie(TrieNode node, List<int> indexes, List<char> path)
+        private void TraverseRemainingTrie(TrieNode node, List<char> path)
         {
-            CheckIndexAndAdd(node, indexes, path);
+            CheckIndexAndAdd(node, path);
             foreach(var child in node.GetAllChildren())
             {
                 List<char> newPath = new List<char>(path);
                 newPath.Add(child.Key);
-                TraverseRemainingTrie(child.Value, indexes, newPath);
+                TraverseRemainingTrie(child.Value, newPath);
             }
         }
         
-        private void CheckIndexAndAdd(TrieNode node, List<int> indexes, List<char> path)
+        private void CheckIndexAndAdd(TrieNode node, List<char> path, int start = 0)
         {
             int index = node.GetIndex();
             if(index != -1)
             {
-                if(CheckIfPalindrome(path))
+                if(CheckIfPalindrome(path, start))
                 {
                     indexes.Add(index);
                 }                
             }
         }
         
-        private void CheckIndexAndAdd(TrieNode node, List<int> indexes, string word, int start)
+        private void CheckIndexAndAdd(TrieNode node, string word, int start = 0)
         {
             int index = node.GetIndex();
             if(index != -1)
@@ -191,7 +203,20 @@ public class Solution {
             }
         }
         
-        private bool CheckIfPalindrome(string word, int start)
+        private bool CheckIfPalindrome(List<char> path, int start) 
+        {
+            int end = path.Count - 1;
+            while(start <= end)
+            {
+                if(path[start] != path[end])
+                    return false;
+                ++start;
+                --end;
+            }
+            return true;
+        }
+        
+        private bool CheckIfPalindrome(string word, int start) 
         {
             int end = word.Length - 1;
             while(start <= end)
@@ -203,20 +228,5 @@ public class Solution {
             }
             return true;
         }
-        
-        private bool CheckIfPalindrome(List<char> path)
-        {
-            int start = 0;
-            int end = path.Count - 1;
-            while(start <= end)
-            {
-                if(path[start] != path[end])
-                    return false;
-                ++start;
-                --end;
-            }
-            return true;
-        }
     }
-    
 }
