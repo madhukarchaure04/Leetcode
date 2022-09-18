@@ -27,39 +27,37 @@ public class Solution {
     }
 
     public int Trap(int[] height)
+    {
+        int[] trappedWater = Enumerable.Repeat(Int32.MaxValue, heights.Length).ToArray();
+        CalculateTrappedWater(start:0, end:heights.Length, step:1, heights, trappedWater, IsSmallerThan);
+        CalculateTrappedWater(start:heights.Length - 1,end: 0,step: -1, heights, trappedWater , IsGreaterThanOrEqual);
+        return trappedWater.Sum();
+    }
+
+    private void CalculateTrappedWater(int start, int end, int step, int[] heights, int[] trappedWater ,Func<int, int, bool> loopCheck)
+    {
+        int currentTallest = 0;
+        for(int i = start; loopCheck(i, end); i += step)
         {
-            int[] trappedWater = Enumerable.Repeat(Int32.MaxValue, heights.Length).ToArray();
-
-            CalculateTrappedWater(start:0, end:heights.Length, step:1, heights, trappedWater, IsSmallerThan);
-            CalculateTrappedWater(start:heights.Length - 1,end: 0,step: -1, heights, trappedWater , IsGreaterThanOrEqual);
-
-            return trappedWater.Sum();
-        }
-
-        private void CalculateTrappedWater(int start, int end, int step, int[] heights, int[] trappedWater ,Func<int, int, bool> loopCheck)
-        {
-            int currentTallest = 0;
-            for(int i = start; loopCheck(i, end); i += step)
+            if(currentTallest <= heights[i])
             {
-                if(currentTallest <= heights[i])
-                {
-                    currentTallest = heights[i];
-                    trappedWater[i] = 0;
-                }
-                else
-                {
-                    trappedWater[i] = Math.Min(trappedWater[i], currentTallest - heights[i]);
-                }
+                currentTallest = heights[i];
+                trappedWater[i] = 0;
+            }
+            else
+            {
+                trappedWater[i] = Math.Min(trappedWater[i], currentTallest - heights[i]);
             }
         }
+    }
 
-        public bool IsSmallerThan(int first, int second)
-        {
-            return first < second;
-        }
-
-        public bool IsGreaterThanOrEqual(int first, int second)
-        {
-            return first >= second;
-        }
+    public bool IsSmallerThan(int first, int second)
+    {
+        return first < second;
+    }
+    
+    public bool IsGreaterThanOrEqual(int first, int second)
+    {
+        return first >= second;
+    }
 }
