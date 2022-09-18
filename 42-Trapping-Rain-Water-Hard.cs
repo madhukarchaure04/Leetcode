@@ -22,41 +22,44 @@ n == height.length
 public class Solution {
     public static void Main()
     {
-        int[] heights = { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 };
-        Console.WriteLine(Trap(heights));ß
+        int[] height = { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 };
+        Console.WriteLine(Trap(heights));
     }
 
-    public int Trap(int[] height) {
-        int[] waterTrap = new int[height.Length];
-        int currentTallestFromLeft = 0;
-        int currentTallestFromRight = 0;
-        for(int leftIndex = 0 ; leftIndex < height.Length ; ++leftIndex)
+    public int Trap(int[] height)
         {
-            //Left to right
-            if(currentTallestFromLeft < height[leftIndex])
+            int[] trappedWater = Enumerable.Repeat(Int32.MaxValue, heights.Length).ToArray();
+
+            CalculateTrappedWater(start:0, end:heights.Length, step:1, heights, trappedWater, IsSmallerThan);
+            CalculateTrappedWater(start:heights.Length - 1,end: 0,step: -1, heights, trappedWater , IsGreaterThanOrEqual);
+
+            return trappedWater.Sum();
+        }
+
+        private void CalculateTrappedWater(int start, int end, int step, int[] heights, int[] trappedWater ,Func<int, int, bool> loopCheck)
+        {
+            int currentTallest = 0;
+            for(int i = start; loopCheck(i, end); i += step)
             {
-                currentTallestFromLeft = height[leftIndex];
-            }
-            else
-            {
-                waterTrap[leftIndex] = currentTallestFromLeft - height[leftIndex];
+                if(currentTallest <= heights[i])
+                {
+                    currentTallest = heights[i];
+                    trappedWater[i] = 0;
+                }
+                else
+                {
+                    trappedWater[i] = Math.Min(trappedWater[i], currentTallest - heights[i]);
+                }
             }
         }
-        
-        for(int rightIndex = height.Length - 1 ; rightIndex >= 0 ; --rightIndex)
+
+        public bool IsSmallerThan(int first, int second)
         {
-            //Right to left
-            if(currentTallestFromRight <= height[rightIndex])
-            {
-                currentTallestFromRight = height[rightIndex];
-                waterTrap[rightIndex] = 0;
-            }
-            else
-            {
-                waterTrap[rightIndex] = Math.Min(waterTrap[rightIndex], currentTallestFromRight - height[rightIndex]);
-            }
+            return first < second;
         }
-        
-        return waterTrap.Sum();
-    }
+
+        public bool IsGreaterThanOrEqual(int first, int second)
+        {
+            return first >= second;
+        }
 }
