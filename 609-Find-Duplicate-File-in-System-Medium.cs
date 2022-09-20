@@ -53,20 +53,34 @@ public class Solution
     public IList<IList<string>> FindDuplicate(string[] paths) 
     {
         Dictionary<string, List<string>> duplicates = new Dictionary<string, List<string>>();
-        IList<IList<string>> duplicateFiles = new List<IList<string>>();
         foreach(string path in paths)
         {
             string[] data = path.Split(' ');
             for(int i = 1 ; i < data.Length ; ++i)
             {
                 string[] fileInfo = data[i].Split('(');
-                if(!duplicates.ContainsKey(fileInfo[1]))
+                //Keys are hashed to faster comparison for long files.
+                string encodedData = Hash(fileInfo[1]);
+                if(!duplicates.ContainsKey(encodedData))
                 {
-                    duplicates[fileInfo[1]] = new List<string>();
+                    duplicates[encodedData] = new List<string>();
                 }
-                duplicates[fileInfo[1]].Add(data[0] + '/' + fileInfo[0]);
+                duplicates[encodedData].Add(data[0] + '/' + fileInfo[0]);
             }
         }
+
+        return FormatResult(duplicates);
+    }
+
+    private string Hash(string input)
+    {
+        var hash = new System.Security.Cryptography.SHA1Managed().ComputeHash(Encoding.UTF8.GetBytes(input));
+        return string.Concat(hash.Select(b => b.ToString("x2")));
+    }
+
+    private IList<IList<string>> FormatResult(Dictionary<string, List<string>> duplicates)
+    {
+        IList<IList<string>> duplicateFiles = new List<IList<string>>();
         foreach(var item in duplicates)
         {
             if(item.Value.Count() > 1)
