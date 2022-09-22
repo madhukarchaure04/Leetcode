@@ -27,13 +27,6 @@ words[i] consists of lower-case English letters.
 */
 
 public class Solution {
-
-    public static void Main()
-    {
-        string[] words = {"abcd","dcba","lls","s","sssll"};
-        PalindromePairs(words);
-    }
-    
     public IList<IList<int>> PalindromePairs(string[] words) 
     {
         Trie trie = new Trie();   

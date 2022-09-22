@@ -44,12 +44,6 @@ How to make sure the duplicated files you find are not false positive?
 
 public class Solution 
 {
-    public static void Main()
-    {
-        string[] paths = {"root/a 1.txt(abcd) 2.txt(efgh)","root/c 3.txt(abcd)","root/c/d 4.txt(efgh)","root 4.txt(efgh)"};
-        FindDuplicate(paths);
-    }
-
     public IList<IList<string>> FindDuplicate(string[] paths) 
     {
         Dictionary<string, List<string>> duplicates = new Dictionary<string, List<string>>();

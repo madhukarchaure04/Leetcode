@@ -20,12 +20,6 @@ n == height.length
 */
 
 public class Solution {
-    public static void Main()
-    {
-        int[] height = { 0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1 };
-        Console.WriteLine(Trap(heights));
-    }
-
     public int Trap(int[] height)
     {
         int[] trappedWater = Enumerable.Repeat(Int32.MaxValue, heights.Length).ToArray();
