@@ -37,22 +37,10 @@ dominoes[i] is either 'L', 'R', or '.'.
 */
 
 public class Solution {
-    public string PushDominoes(string dominoes) {
-        List<int> nonPairedL = new List<int>();
-        List<int> nonPairedR = new List<int>();
-        Dictionary<int, int> pairsRL = FindPairs(dominoes, nonPairedL, nonPairedR);
-        char[] result = Enumerable.Repeat('.', dominoes.Length).ToArray();
-        ProcessPairs(pairsRL, dominoes, result);
-        ProcessNonPairedL(nonPairedL, dominoes, result);
-        ProcessNonPairedR(nonPairedR, dominoes, result);
-        return new string(result);
-        
-    }
-    private Dictionary<int, int> FindPairs(string dominoes, List<int> nonPairedL, List<int> nonPairedR)
+    public string PushDominoes(string dominoes)
     {
-        Dictionary<int, int> pairsRL = new Dictionary<int, int>();
-        
-        int currentR = -1;
+        char[] result = Enumerable.Repeat('.', dominoes.Length).ToArray();
+        int lastSeenRIndex = -1;
         for(int i = 0 ; i < dominoes.Length ; ++i)
         {
             switch(dominoes[i])
@@ -60,94 +48,54 @@ public class Solution {
                 case '.':
                     break;
                 case 'L':
-                    if(currentR != -1)
+                    if(lastSeenRIndex != -1)
                     {
-                        pairsRL[currentR] = i;
-                        currentR = -1;
+                        ProcessPair(lastSeenRIndex, i, dominoes, result);
+                        lastSeenRIndex = -1;
                     }
                     else
-                        nonPairedL.Add(i);
+                    {
+                        ProcessNonPairedL(i, dominoes, result);
+                    }
                     break;
                 case 'R':
-                    if(currentR != -1)
-                        nonPairedR.Add(currentR);
-                    
-                    currentR = i;
+                    if(lastSeenRIndex != -1)
+                    {
+                        ProcessNonPairedR(lastSeenRIndex, i, dominoes, result);
+                    }
+                    lastSeenRIndex = i;
                     break;
             }
         }
-        if(currentR != -1)
-            nonPairedR.Add(currentR);
+        if(lastSeenRIndex != -1)
+            ProcessNonPairedR(lastSeenRIndex, result.Length, dominoes, result);
         
-        return pairsRL;
+        return new string(result);
+    }
+    private void ProcessPair(int R, int L, string dominoes, char[] result)
+    {
+        while(R < L)
+        {
+            result[R++] = 'R';
+            result[L--] = 'L';
+        }
     }
     
-    private int FindPairedL(string dominoes,int rIndex)
+    private void ProcessNonPairedL(int lIndex, string dominoes, char[] result)
     {
-        for(int i = rIndex + 1 ; i < dominoes.Length ; ++i)
+        while(lIndex >= 0 && result[lIndex] == '.')
         {
-            if(dominoes[i] == 'L')
-                return i;
+            result[lIndex] = 'L';
+            --lIndex;
         }
-        return -1;
     }
-    private void FindNonPairedR(string dominoes,int start, int end,List<int> nonPairedR)
+    
+    private void ProcessNonPairedR(int start, int end, string dominoes, char[] result)
     {
-        while(start < end)
+        while(start < end && result[start] == '.')
         {
-            if(dominoes[start] == 'R')
-                nonPairedR.Add(start);
+            result[start] = 'R';
             ++start;
-        }
-    }
-    private void ProcessPairs(Dictionary<int, int> pairsRL, string dominoes, char[] result)
-    {
-        foreach(var item in pairsRL)
-        {
-            int R = item.Key;
-            int L = item.Value;
-            result[R] = 'R';
-            result[L] = 'L';
-            while(++R < --L)
-            {
-                
-                if(dominoes[R] == '.')
-                    result[R] = 'R';
-                else
-                {
-                    result[R] = dominoes[R];
-                    break;
-                }
-                if(dominoes[L] == '.')
-                    result[L] = 'L';
-                else
-                    result[L] = dominoes[L];
-            }
-        }
-    }
-    private void ProcessNonPairedL(List<int> nonPairedL, string dominoes, char[] result)
-    {
-        foreach(int item in nonPairedL)
-        {
-            int i = item;
-            while(i >= 0 && result[i] == '.')
-            {
-                result[i] = 'L';
-                --i;
-            }
-        }
-    }
-    
-    private void ProcessNonPairedR(List<int> nonPairedR, string dominoes, char[] result)
-    {
-        foreach(int item in nonPairedR)
-        {
-            int i = item;
-            while(i < result.Length && result[i] == '.')
-            {
-                result[i] = 'R';
-                ++i;
-            }
         }
     }
 }
