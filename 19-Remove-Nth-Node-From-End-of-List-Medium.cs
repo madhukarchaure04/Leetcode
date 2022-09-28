@@ -40,26 +40,42 @@ The number of nodes in the list is sz.
  */
 public class Solution {
     public ListNode RemoveNthFromEnd(ListNode head, int n) {
+        ListNode nthNodeFromStart = GetNthFromStart(head, n);
+        return RemoveNthFromEnd(head, nthNodeFromStart);
+    }
+    
+    private ListNode GetNthFromStart(ListNode head, int n)
+    {
+        ListNode node = head;
         int i = 1;
-        ListNode second = head;
-        while(i < n)
+        while(i++ < n)
         {
-            second = second.next;
-            ++i;
+            node = node.next;
         }
-        
-        ListNode first = null;
-        while(second.next != null)
-        {
-            first = first == null ? head : first.next;
-            second = second.next;
-        }
-        
-        if(first == null)
+        return node;
+    }
+    
+    private ListNode RemoveNthFromEnd(ListNode head, ListNode nthNodeFromStart)
+    {
+        ListNode nodeBeforeNth = GetNodeBeforeNth(head, nthNodeFromStart);
+        if(nodeBeforeNth == null)
             return head.next;
         
-        first.next = first.next != null ? first.next.next : null;
+        if(nodeBeforeNth.next != null)
+            nodeBeforeNth.next = nodeBeforeNth.next.next;
         
         return head;
+    }
+    
+    private ListNode GetNodeBeforeNth(ListNode head, ListNode nthNodeFromStart)
+    {
+        ListNode node = nthNodeFromStart;
+        ListNode nodeBeforeNth = null;
+        while(node.next != null)
+        {
+            nodeBeforeNth = nodeBeforeNth == null ? head : nodeBeforeNth.next;
+            node = node.next;
+        }
+        return nodeBeforeNth;
     }
 }
