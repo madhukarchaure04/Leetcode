@@ -44,7 +44,7 @@ public class Solution {
     {
         if(start > end)
             return start == 0 ? end : start;
-        int mid = (start + end) / 2;
+        int mid = start + (end - start + 1) / 2;
         if(array[mid] == num)
             return mid;
         else if(array[mid] < num)
