@@ -32,18 +32,12 @@ public class Solution {
         IList<int> result = new List<int>();
         
         int relativePosition = FindRelativePosition(arr, 0, arr.Length-1, x);
-        Console.WriteLine(relativePosition);
+        
         if(relativePosition == -1 || relativePosition == arr.Length)
         {
-            int skip = relativePosition == -1 ? 0 : arr.Length - k;
-            result = arr.Skip(skip).Take(k).ToList();
+            return GetKElements(arr, relativePosition, k);
         }
-        else
-        {
-            result = FindClosestElements(arr, relativePosition, k, x);
-        }
-        
-        return result;
+        return FindClosestElements(arr, relativePosition, k, x);
     }
     
     private int FindRelativePosition(int[] array, int start, int end,int num)
@@ -59,27 +53,36 @@ public class Solution {
             return FindRelativePosition(array, start, mid - 1, num);
     }
     
+    public IList<int> GetKElements(int[] arr,int relativePosition, int k)
+    {
+        int skip = relativePosition == -1 ? 0 : arr.Length - k;
+        return arr.Skip(skip).Take(k).ToList();
+    }
+    
     public IList<int> FindClosestElements(int[] arr,int relativePosition, int k, int x)
     {
         int left = relativePosition-1;
         int right = relativePosition;
-        List<int> result = new List<int>();
-        while(result.Count < k)
+        List<int> leftNums = new List<int>();
+        List<int> rightNums = new List<int>();
+        while((right - left) <= k)
         {
             int leftDiff = left >= 0 ? Math.Abs(arr[left] - x) : Int32.MaxValue;
             int rightDiff = right < arr.Length ? Math.Abs(arr[right] - x) : Int32.MaxValue;
             if(leftDiff <= rightDiff)
             {
-                result.Add(arr[left]);
+                leftNums.Add(arr[left]);
                 --left;
             }
             else
             {
-                result.Add(arr[right]);
+                rightNums.Add(arr[right]);
                 ++right;
             }
         }
-        result.Sort();
+        leftNums.Reverse();
+        List<int>result = new List<int>(leftNums);
+        result.AddRange(rightNums);
         return result;
     }
 }
