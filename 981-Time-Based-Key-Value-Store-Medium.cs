@@ -38,26 +38,34 @@ At most 2 * 105 calls will be made to set and get.
 */
 
 public class TimeMap {
-    Dictionary<string, BinarySearchTree> map;
+    Dictionary<string, List<Node>> map;
+    NodeComparer comparer;
     public TimeMap() {
-        map = new Dictionary<string, BinarySearchTree>();
+        map = new Dictionary<string, List<Node>>();
+        comparer = new NodeComparer();
     }
     
     public void Set(string key, string value, int timestamp) {
-        if(map.ContainsKey(key))
+        if(!map.ContainsKey(key))
         {
-            map[key].Add(value, timestamp);
+            map[key] = new List<Node>();
         }
-        else
-        {
-            map[key] = new BinarySearchTree(value, timestamp);
-        }
+        map[key].Add(new Node(timestamp, value));
     }
     
     public string Get(string key, int timestamp) {
         if(map.ContainsKey(key))
         {
-            return map[key].Search(timestamp);
+            int index = map[key].BinarySearch(new Node(timestamp), comparer);
+            if(index < 0)
+            {
+                index = ~index - 1;
+            }
+            //If first number is greater than current timestamp
+            if(index == -1)
+                return "";
+            else
+                return map[key][index].Value;;
         }
         else
         {
@@ -66,76 +74,23 @@ public class TimeMap {
     }
 }
 
-class BinaryTreeNode
+class Node
 {
     public string Value;
     public int Timestamp;
-    public BinaryTreeNode Left;
-    public BinaryTreeNode Right;
-    public BinaryTreeNode(string value, int timestamp)
+    
+    public Node(int timestamp, string value = "")
     {
-        this.Timestamp = timestamp;
         this.Value = value;
-        Left = null;
-        Right = null;
+        this.Timestamp = timestamp;
     }
 }
 
-class BinarySearchTree
+class NodeComparer: IComparer<Node>
 {
-    public BinaryTreeNode Root;
-    public BinarySearchTree(string value, int timestamp)
+    public int Compare(Node x, Node y)
     {
-        Root = new BinaryTreeNode(value, timestamp);
-    }
-    
-    public void Add(string value, int timestamp)
-    {
-        Add(Root, value, timestamp);
-    }
-    
-    private void Add(BinaryTreeNode node,string value,int timestamp)
-    {
-        if(node.Timestamp > timestamp)
-        {
-            if(node.Left != null)
-            {
-                Add(node.Left, value, timestamp);
-            }
-            else
-            {
-                node.Left = new BinaryTreeNode(value, timestamp);
-            }
-        }
-        else
-        {
-            if(node.Right != null)
-            {
-                Add(node.Right, value, timestamp);
-            }
-            else
-            {
-                node.Right = new BinaryTreeNode(value, timestamp);
-            }
-        }
-    }
-    
-    public string Search(int timestamp)
-    {
-        return Search(Root, timestamp, "");
-    }
-    
-    private string Search(BinaryTreeNode node, int timestamp, string lastCloserValue)
-    {
-        if(node == null)
-            return lastCloserValue;
-        if(node.Timestamp == timestamp)
-            return node.Value;
-        
-        if(node.Timestamp > timestamp)
-            return Search(node.Left, timestamp, lastCloserValue);
-        else
-            return Search(node.Right, timestamp, node.Value);
+        return x.Timestamp.CompareTo(y.Timestamp);
     }
 }
 
